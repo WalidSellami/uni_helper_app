@@ -209,6 +209,7 @@ Widget defaultButton({
   double height = 48.0,
   double radius = 22.0,
   required String text,
+  required isDarkTheme,
   required Function onPress,
   required BuildContext context,
 }) => SizedBox(
@@ -217,7 +218,7 @@ Widget defaultButton({
     height: height,
     shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(radius)),
-    color: lightPrimary,
+    color: isDarkTheme ? darkPrimary : lightPrimary,
     onPressed: () {
       onPress();
     },
@@ -238,13 +239,14 @@ Widget defaultSecondButton({
   double height = 48.0,
   required String text,
   required Function onPress,
+  required isDarkTheme,
   required BuildContext context,
 }) => SizedBox(
   width: 200.0,
   child: MaterialButton(
     height: height,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-    color: lightPrimary,
+    color: isDarkTheme ? darkPrimary : lightPrimary,
     onPressed: () {
       onPress();
     },
@@ -366,7 +368,7 @@ dynamic showLoading(context, isDarkTheme) => showDialog(
             padding: const EdgeInsets.all(26.0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18.0),
-              color: isDarkTheme ? darkColor1 : Colors.white,
+              color: isDarkTheme ? darkColor2 : Colors.white,
             ),
             clipBehavior: Clip.antiAlias,
             child: (kIsWeb) ? SizedBox(
@@ -793,7 +795,7 @@ dynamic showWebAlertEdit({
                 physics: ClampingScrollPhysics(),
                 clipBehavior: Clip.antiAlias,
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(12.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -930,105 +932,6 @@ dynamic showWebAlertEdit({
                 ),
               ),
             ),
-            // content: Padding(
-            //   padding: const EdgeInsets.all(8.0),
-            //   child: TextFormField(
-            //     controller: chatNameController,
-            //     focusNode: chatNameFocusNode,
-            //     keyboardType: TextInputType.text,
-            //     maxLength: 30,
-            //     clipBehavior: Clip.antiAlias,
-            //     decoration: InputDecoration(
-            //       hintText: '',
-            //       border: OutlineInputBorder(
-            //         borderRadius: BorderRadius.circular(10.0),
-            //         borderSide: const BorderSide(width: 1.0),
-            //       ),
-            //       prefixIcon: const Icon(EvaIcons.editOutline, size: 20.0,),
-            //     ),
-            //     style: TextStyle(
-            //       fontSize: 14.0,
-            //       fontWeight: FontWeight.bold,
-            //       color: isDarkTheme ? Colors.white : Colors.black,
-            //     ),
-            //     validator: (value) {
-            //       if (value == null || value.isEmpty) {
-            //         return S.of(context).chat_name_check;
-            //       }
-            //       if (value.length > 30) {
-            //         return S.of(context).chat_name_check_2;
-            //       }
-            //       return null;
-            //     },
-            //     onFieldSubmitted: (v) async {
-            //       chatNameFocusNode.unfocus();
-            //       if (CheckCubit.get(context).hasInternet) {
-            //         if (formKey.currentState!.validate()) {
-            //           String name = chatNameController.text;
-            //           Navigator.pop(dialogContext);
-            //           showLoading(context, isDarkTheme);
-            //           await AppCubit.get(context).editChat(
-            //             name: name,
-            //             chatId: chatId,
-            //             context: context,
-            //           );
-            //         }
-            //       } else {
-            //         showFlutterToast(
-            //           message: S.of(context).connection_status,
-            //           state: ToastStates.error,
-            //           context: context,
-            //         );
-            //       }
-            //     },
-            //   ),
-            // ),
-            // actions: [
-            //   TextButton(
-            //     onPressed: () {
-            //       Navigator.pop(dialogContext);
-            //     },
-            //     child: Text(
-            //       S.of(context).cancel,
-            //       style: TextStyle(
-            //         fontSize: 15.0,
-            //         color: isDarkTheme ? Colors.white : Colors.black,
-            //         fontWeight: FontWeight.bold,
-            //       ),
-            //     ),
-            //   ),
-            //   TextButton(
-            //     onPressed: () async {
-            //       chatNameFocusNode.unfocus();
-            //       if (CheckCubit.get(context).hasInternet) {
-            //         if (formKey.currentState!.validate()) {
-            //           String name = chatNameController.text;
-            //           Navigator.pop(dialogContext);
-            //           showLoading(context, isDarkTheme);
-            //           await AppCubit.get(context).editChat(
-            //             name: name,
-            //             chatId: chatId,
-            //             context: context,
-            //           );
-            //         }
-            //       } else {
-            //         showFlutterToast(
-            //           message: S.of(context).connection_status,
-            //           state: ToastStates.error,
-            //           context: context,
-            //         );
-            //       }
-            //     },
-            //     child: Text(
-            //       S.of(context).rename,
-            //       style: TextStyle(
-            //         fontSize: 15.0,
-            //         color: greenColor,
-            //         fontWeight: FontWeight.bold,
-            //       ),
-            //     ),
-            //   ),
-            // ],
           ),
         ),
       );
@@ -1229,7 +1132,7 @@ defaultLanguageDropdown({
   ),
   padding: EdgeInsets.all(4.0),
   borderRadius: BorderRadius.circular(12.0),
-  dropdownColor: isDarkTheme ? ((kIsWeb) ? darkColor2 : darkColor1) : Colors.white,
+  dropdownColor: isDarkTheme ? darkColor2 : Colors.white,
   enableFeedback: true,
   underline: Container(
     height: 1.5,
@@ -1355,7 +1258,7 @@ Widget defaultPopUpMenuOptions({
 
 Widget buildItemMessage(MessageModel msg, isDarkTheme, context) {
     return FadeIn(
-      duration: Duration(milliseconds: 200),
+      duration: Duration(milliseconds: 300),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
         child: Align(
@@ -1376,7 +1279,7 @@ Widget buildItemMessage(MessageModel msg, isDarkTheme, context) {
               color: (msg.isUser == true) ?
                   (Theme.of(context).colorScheme.primary.withPredefinedOpacity(.2)) :
                   (isDarkTheme
-                          ? HexColor('303030').withPredefinedOpacity(0.8)
+                          ? HexColor('292e36')
                           : Colors.grey.shade200),
             ),
             constraints: BoxConstraints(

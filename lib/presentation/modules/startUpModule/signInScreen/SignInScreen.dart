@@ -300,6 +300,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                   duration: Duration(milliseconds: 300),
                                   child: defaultButton(
                                       text: S.of(context).sign_in,
+                                      isDarkTheme: isDarkTheme,
                                       onPress: () {
                                         focusNode.unfocus();
                                         focusNode2.unfocus();

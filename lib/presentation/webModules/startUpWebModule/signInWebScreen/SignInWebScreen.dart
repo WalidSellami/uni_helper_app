@@ -3,6 +3,7 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'package:uni_helper/generated/l10n.dart';
 import 'package:uni_helper/presentation/webModules/chatWebModule/chatWebScreen/ChatWebScreen.dart';
 import 'package:uni_helper/shared/adaptative/loadingIndicator/loadingIndicator.dart';
@@ -199,7 +200,7 @@ class _SignInWebScreenState extends State<SignInWebScreen> {
                                       padding: const EdgeInsets.all(26.0),
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(24.0),
-                                        color: isDarkTheme ? darkColor1 : Colors.white,
+                                        color: isDarkTheme ? darkColor2 : Colors.white,
                                           boxShadow: [
                                             BoxShadow(
                                               color: Colors.black12,
@@ -403,6 +404,7 @@ class _SignInWebScreenState extends State<SignInWebScreen> {
                                                       height: 57.0,
                                                       text: S.of(context).sign_in,
                                                       radius: 14.0,
+                                                      isDarkTheme: isDarkTheme,
                                                       onPress: () {
                                                         focusNode.unfocus();
                                                         focusNode2.unfocus();

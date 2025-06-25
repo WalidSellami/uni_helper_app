@@ -54,7 +54,7 @@ void micAnimationConfig(animationController, isStartListening) {
     if (scrollController.hasClients) {
       await scrollController.animateTo(
           scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 800),
+          duration: const Duration(milliseconds: 700),
           curve: Curves.easeInOut);
     }
   }

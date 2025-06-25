@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:lottie/lottie.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:uni_helper/data/models/chatModel/ChatModel.dart';
 import 'package:uni_helper/generated/l10n.dart';
@@ -149,6 +150,7 @@ class _ChatWebScreenState extends State<ChatWebScreen>
 
   Future<void> vocalConfig(langVocal) async {
     if (!isStartListening && speechToText.isNotListening) {
+      focusNode.unfocus();
       await startListening(langVocal);
     } else {
       await stopListening();
@@ -219,7 +221,7 @@ class _ChatWebScreenState extends State<ChatWebScreen>
         AppCubit.get(context).getChats(context);
       }
 
-      Future.delayed(Duration(milliseconds: 300)).then((v) {
+      Future.delayed(Duration(milliseconds: 700)).then((v) {
         if(!mounted) return;
         FocusScope.of(context).requestFocus(focusNode);
       });
@@ -294,7 +296,7 @@ class _ChatWebScreenState extends State<ChatWebScreen>
                   }
 
                   WidgetsBinding.instance.addPostFrameCallback((_) async {
-                    await Future.delayed(Duration(milliseconds: 1500)).then((value) async {
+                    await Future.delayed(Duration(milliseconds: 1200)).then((value) async {
                       await scrollToBottom(scrollController);
                     });
                   });
@@ -614,6 +616,7 @@ class _ChatWebScreenState extends State<ChatWebScreen>
                                                   },
                                                   child: Icon(
                                                     Icons.arrow_downward_rounded,
+                                                    color: Colors.white,
                                                     size: 24.0,
                                                   ),
                                                 ),
@@ -837,6 +840,7 @@ class _ChatWebScreenState extends State<ChatWebScreen>
                                         },
                                         child: Icon(
                                           Icons.arrow_downward_rounded,
+                                          color: Colors.white,
                                           size: 24.0,
                                         ),
                                       ),
@@ -977,15 +981,19 @@ class _ChatWebScreenState extends State<ChatWebScreen>
                                     key: globalIcBtnKey,
                                     onTap: () async {
                                       if (checkCubit.hasInternet) {
-                                        if (!isLangSelected) {
-                                          await showPopupMenuLangConfig(
-                                              isDarkTheme,
-                                              context);
-                                        } else {
-                                          await vocalConfig(
-                                            langVocal,
-                                          );
+                                        await Permission.microphone.request();
+
+                                        if(await Permission.microphone.isGranted) {
+                                          if (!isLangSelected) {
+                                            if(!mounted) return;
+                                            await showPopupMenuLangConfig(
+                                                isDarkTheme,
+                                                context);
+                                          } else {
+                                            await vocalConfig(langVocal);
+                                          }
                                         }
+
                                       } else {
                                         showFlutterToast(
                                           message: S.of(context).connection_status,
@@ -1597,6 +1605,7 @@ class _ChatWebScreenState extends State<ChatWebScreen>
               FadeIn(
                 child: IconButton(
                   enableFeedback: true,
+                  padding: EdgeInsets.all(4.0),
                   tooltip: S.of(context).feedback,
                   onPressed: () async {
                     if (checkCubit.hasInternet) {
@@ -1630,30 +1639,6 @@ class _ChatWebScreenState extends State<ChatWebScreen>
                   ),
                 ),
               ),
-
-              // defaultIcon(
-              //   text: S.of(context).feedback,
-              //   color: isDarkTheme
-              //           ? Colors.grey.shade800.withPredefinedOpacity(.7)
-              //           : Colors.white,
-              //   size: 26.0,
-              //   radius: 50.0,
-              //   icon: Icons.feedback_rounded,
-              //   colorIcon: isDarkTheme ? Colors.white : Colors.black,
-              //   onPress: () async {
-              //     if (checkCubit.hasInternet) {
-              //       await sendMailMsg(isFeedback: true, recipient: devMail);
-              //     } else {
-              //       showFlutterToast(
-              //         message: S.of(context).connection_status,
-              //         state: ToastStates.error,
-              //         context: context,
-              //       );
-              //     }
-              //   },
-              //   context: context,
-              // ),
-
               26.0.hrSpace,
               Container(
                 width: 0.75,
@@ -1717,113 +1702,6 @@ class _ChatWebScreenState extends State<ChatWebScreen>
       ],
     ),
   );
-
-  // Widget buildInitialWebDrawer(
-  //   ThemeData theme,
-  //   isDarkTheme,
-  //   AppCubit appCubit,
-  //   CheckCubit checkCubit,
-  // ) => Container(
-  //   color: isDarkTheme ? darkColor1 : lightWebBackground,
-  //   child: Padding(
-  //     padding: const EdgeInsets.all(22.0),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         IconButton(
-  //           onPressed: () async {
-  //             appCubit.changeWebDrawerState();
-  //             // await Future.delayed(Duration(milliseconds: 700)).then((value) async {
-  //             //   await appCubit.userProfile();
-  //             //   if(!mounted) return;
-  //             //     await appCubit.getChats(context);
-  //             // });
-  //           },
-  //           icon: Icon(Icons.menu_rounded, size: 26.0),
-  //         ),
-  //         36.0.vrSpace,
-  //         IconButton(
-  //           onPressed: () async {
-  //             if (checkCubit.hasInternet) {
-  //               appCubit.clearData(isNewChat: true);
-  //             } else {
-  //               showFlutterToast(
-  //                 message: S.of(context).connection_status,
-  //                 state: ToastStates.error,
-  //                 context: context,
-  //               );
-  //             }
-  //           },
-  //           icon: Icon(
-  //             Icons.add_circle_rounded,
-  //             color:
-  //                 (appCubit.messages.isEmpty)
-  //                     ? theme.colorScheme.primary.withPredefinedOpacity(.3)
-  //                     : theme.colorScheme.primary,
-  //           ),
-  //           style: ButtonStyle(
-  //             backgroundColor: WidgetStatePropertyAll(
-  //               theme.scaffoldBackgroundColor,
-  //             ),
-  //             side: WidgetStatePropertyAll(
-  //               BorderSide(
-  //                 width: 1.5,
-  //                 color:
-  //                     (appCubit.messages.isEmpty)
-  //                         ? theme.colorScheme.primary.withPredefinedOpacity(.3)
-  //                         : theme.colorScheme.primary,
-  //               ),
-  //             ),
-  //             enableFeedback: true,
-  //             overlayColor: WidgetStatePropertyAll(
-  //               Colors.grey.shade300.withPredefinedOpacity(.15),
-  //             ),
-  //           ),
-  //         ),
-  //         Spacer(),
-  //         IconButton(
-  //           onPressed: () {
-  //             if (checkCubit.hasInternet) {
-  //               appCubit.changeWebDrawerState();
-  //             } else {
-  //               showFlutterToast(
-  //                 message: S.of(context).connection_status,
-  //                 state: ToastStates.error,
-  //                 context: context,
-  //               );
-  //             }
-  //           },
-  //           icon: Icon(
-  //             EvaIcons.settingsOutline,
-  //             color: isDarkTheme ? Colors.white : Colors.black,
-  //           ),
-  //         ),
-  //         32.0.vrSpace,
-  //         IconButton(
-  //           onPressed: () {
-  //             if (checkCubit.hasInternet) {
-  //               showWebAlertSignOut(context, () {
-  //                 appCubit.signOut(context, isDarkTheme);
-  //               });
-  //             } else {
-  //               showFlutterToast(
-  //                 message: S.of(context).connection_status,
-  //                 state: ToastStates.error,
-  //                 context: context,
-  //               );
-  //             }
-  //           },
-  //           color: redColor,
-  //           icon: Icon(Icons.logout_rounded, color: Colors.white),
-  //           style: ButtonStyle(
-  //             backgroundColor: WidgetStatePropertyAll(redColor),
-  //           ),
-  //         ),
-  //         12.0.vrSpace,
-  //       ],
-  //     ),
-  //   ),
-  // );
 
 
   Widget buildListOfChats(AppCubit appCubit, ThemeData theme, isDarkTheme, sizeWidthScreen) {
@@ -2030,7 +1908,6 @@ class _ChatWebScreenState extends State<ChatWebScreen>
     // final Size size = renderBox.size;
 
     final TextDirection currentDirection = Directionality.of(context);
-
 
     final selectedValue = await showMenu<String>(
       context: context,

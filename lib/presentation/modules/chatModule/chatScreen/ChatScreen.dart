@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:lottie/lottie.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:uni_helper/data/models/chatModel/ChatModel.dart';
 import 'package:uni_helper/generated/l10n.dart';
@@ -149,6 +150,7 @@ class _ChatScreenState extends State<ChatScreen>
 
   Future<void> vocalConfig(langVocal) async {
     if (!isStartListening && speechToText.isNotListening) {
+      focusNode.unfocus();
       await startListening(langVocal);
     } else {
       await stopListening();
@@ -320,14 +322,14 @@ class _ChatScreenState extends State<ChatScreen>
                       isLoading = false;
                       textInput = '';
                     });
-
                   }
 
-                  WidgetsBinding.instance.addPostFrameCallback((_) async {
-                    await Future.delayed(Duration(milliseconds: 1500)).then((value) async {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    Future.delayed(Duration(milliseconds: 1200)).then((value) async {
                       await scrollToBottom(scrollController);
                     });
                   });
+
                 }
 
                 if (state is SuccessDeleteChatAppState) {
@@ -607,6 +609,7 @@ class _ChatScreenState extends State<ChatScreen>
                                                     },
                                                     child: Icon(
                                                       Icons.arrow_downward_rounded,
+                                                      color: Colors.white,
                                                       size: 24.0,
                                                     ),
                                                   ),
@@ -733,10 +736,14 @@ class _ChatScreenState extends State<ChatScreen>
                                                           child: InkWell(
                                                             onTap: () async {
                                                               if (checkCubit.hasInternet) {
-                                                                if (!isLangSelected) {
-                                                                  await langConfig(theme);
-                                                                } else {
-                                                                  await vocalConfig(langVocal);
+                                                                await Permission.microphone.request();
+
+                                                                if(await Permission.microphone.isGranted) {
+                                                                  if (!isLangSelected) {
+                                                                    await langConfig(theme);
+                                                                  } else {
+                                                                    await vocalConfig(langVocal);
+                                                                  }
                                                                 }
                                                               } else {
                                                                 showFlutterToast(
@@ -892,266 +899,313 @@ class _ChatScreenState extends State<ChatScreen>
     AppCubit appCubit,
     CheckCubit checkCubit,
     state,
-  ) => SafeArea(
-    child: Drawer(
-      clipBehavior: Clip.antiAlias,
-      elevation: 10.0,
-      shape: RoundedRectangleBorder(
-        borderRadius:
-            (appCubit.localeLang != 'ar')
-                ? BorderRadius.only(
-                  topRight: Radius.circular(26.0),
-                  bottomRight: Radius.circular(26.0),
-                )
-                : BorderRadius.only(
-                  topLeft: Radius.circular(26.0),
-                  bottomLeft: Radius.circular(26.0),
-                ),
-      ),
-      backgroundColor: theme.scaffoldBackgroundColor,
-      child: SlideInLeft(
-        duration: Duration(milliseconds: 500),
-        child: Padding(
-          padding: const EdgeInsets.all(22.0),
-          child: Column(
-            children: [
-              12.0.vrSpace,
-              Row(
+  ) => Builder(
+    builder: (context) {
+
+      return SafeArea(
+        child: Drawer(
+          clipBehavior: Clip.antiAlias,
+          elevation: 10.0,
+          shape: RoundedRectangleBorder(
+            borderRadius:
+                (appCubit.localeLang != 'ar')
+                    ? BorderRadius.only(
+                      topRight: Radius.circular(26.0),
+                      bottomRight: Radius.circular(26.0),
+                    )
+                    : BorderRadius.only(
+                      topLeft: Radius.circular(26.0),
+                      bottomLeft: Radius.circular(26.0),
+                    ),
+          ),
+          backgroundColor: theme.scaffoldBackgroundColor,
+          child: SlideInLeft(
+            duration: Duration(milliseconds: 500),
+            child: Padding(
+              padding: const EdgeInsets.all(22.0),
+              child: Column(
                 children: [
-                  ZoomIn(
-                    duration: Duration(milliseconds: 500),
-                    child: Container(
-                      width: 65.0,
-                      height: 65.0,
-                      clipBehavior: Clip.antiAlias,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          width: 1.5,
-                          color: isDarkTheme ? Colors.white : Colors.black,
+                  12.0.vrSpace,
+                  Row(
+                    children: [
+                      ZoomIn(
+                        duration: Duration(milliseconds: 500),
+                        child: Container(
+                          width: 65.0,
+                          height: 65.0,
+                          clipBehavior: Clip.antiAlias,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              width: 1.5,
+                              color: isDarkTheme ? Colors.white : Colors.black,
+                            ),
+                          ),
+                          child: Center(
+                            child: Image.network(
+                              appCubit.userModel?.imageProfile ?? imageProfile,
+                              frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                                if(frame == null) {
+                                  return shimmerImageLoading(
+                                    width: 65.0,
+                                    height: 65.0,
+                                    radius: 50.0,
+                                    theme: theme,
+                                    isDarkTheme: isDarkTheme,
+                                  );
+                                }
+                                return FadeIn(
+                                    duration: Duration(milliseconds: 300),
+                                    child: child);
+                              },
+                              errorBuilder: (context, error, stackTrace) {
+                                return Center(
+                                  child: FadeIn(
+                                    duration: Duration(milliseconds: 300),
+                                    child: Icon(
+                                      Icons.error_outline_rounded,
+                                      color: isDarkTheme ? Colors.white : Colors.black,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
                         ),
                       ),
-                      child: Center(
-                        child: Image.network(
-                          appCubit.userModel?.imageProfile ?? imageProfile,
-                          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-                            if(frame == null) {
-                              return shimmerImageLoading(
-                                width: 65.0,
-                                height: 65.0,
-                                radius: 50.0,
-                                theme: theme,
-                                isDarkTheme: isDarkTheme,
-                              );
-                            }
-                            return FadeIn(
-                                duration: Duration(milliseconds: 300),
-                                child: child);
-                          },
-                          errorBuilder: (context, error, stackTrace) {
-                            return Center(
-                              child: FadeIn(
-                                duration: Duration(milliseconds: 300),
-                                child: Icon(
-                                  Icons.error_outline_rounded,
-                                  color: isDarkTheme ? Colors.white : Colors.black,
-                                ),
-                              ),
-                            );
-                          },
+                      12.0.hrSpace,
+                      FadeIn(
+                        child: Text(
+                          displayName(appCubit.userModel?.fullName ?? '...'),
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            letterSpacing: (localeLanguage != 'ar') ? 0.6 : 0.0,
+                            overflow: TextOverflow.ellipsis,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                  12.0.hrSpace,
+                  12.0.vrSpace,
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Divider(thickness: 0.6),
+                  ),
+                  12.0.vrSpace,
                   FadeIn(
-                    child: Text(
-                      displayName(appCubit.userModel?.fullName ?? '...'),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        letterSpacing: (localeLanguage != 'ar') ? 0.6 : 0.0,
-                        overflow: TextOverflow.ellipsis,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              12.0.vrSpace,
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10.0),
-                child: Divider(thickness: 0.6),
-              ),
-              12.0.vrSpace,
-              FadeIn(
-                child: ElevatedButton.icon(
-                  icon: Icon(
-                    Icons.add_circle_rounded,
-                    color:
-                        (appCubit.messages.isEmpty)
-                            ? theme.colorScheme.primary.withPredefinedOpacity(.3)
-                            : theme.colorScheme.primary,
-                  ),
-                  onPressed: () async {
-                    if (checkCubit.hasInternet) {
-                      appCubit.clearData(isNewChat: true);
-                      await Future.delayed(Duration(milliseconds: 100)).then((value) {
-                        scaffoldKey.currentState?.closeDrawer();
-                      });
-                    } else {
-                      showFlutterToast(
-                        message: S.of(context).connection_status,
-                        state: ToastStates.error,
-                        context: context,
-                      );
-                    }
-                  },
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStatePropertyAll(
-                      theme.scaffoldBackgroundColor,
-                    ),
-                    side: WidgetStatePropertyAll(
-                      BorderSide(
-                        width: 1.5,
+                    child: ElevatedButton.icon(
+                      icon: Icon(
+                        Icons.add_circle_rounded,
                         color:
                             (appCubit.messages.isEmpty)
-                                ? theme.colorScheme.primary
-                                    .withPredefinedOpacity(.3)
+                                ? theme.colorScheme.primary.withPredefinedOpacity(.3)
                                 : theme.colorScheme.primary,
                       ),
-                    ),
-                    enableFeedback: true,
-                    overlayColor: WidgetStatePropertyAll(
-                      Colors.grey.shade300.withPredefinedOpacity(.15),
-                    ),
-                  ),
-                  label: Text(
-                    S.of(context).new_chat,
-                    style: TextStyle(
-                      fontSize: 14.0,
-                      color:
-                          (appCubit.messages.isEmpty)
-                              ? theme.colorScheme.primary.withPredefinedOpacity(.3)
-                              : theme.colorScheme.primary,
-                      letterSpacing: (localeLanguage != 'ar') ? 0.6 : 0.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-              16.0.vrSpace,
-              Expanded(
-                child: ConditionalBuilder(
-                  condition: appCubit.groupedChats.isNotEmpty,
-                  builder: (context) => RefreshIndicator(
-                        key: refreshIndicatorKey,
-                        color: theme.colorScheme.primary,
-                        backgroundColor: theme.scaffoldBackgroundColor,
-                        onRefresh: () async {
-                          await Future.delayed(const Duration(seconds: 2)).then((value) {
-                              if (context.mounted) {
-                                if (CheckCubit.get(context).hasInternet) {
-                                  if(AppCubit.get(context).messages.isEmpty) {
-                                    AppCubit.get(context).getChats(context);
-                                  }
-                                }
-                              }
-                            },
+                      onPressed: () async {
+                        if (checkCubit.hasInternet) {
+                          appCubit.clearData(isNewChat: true);
+                          await Future.delayed(Duration(milliseconds: 100)).then((value) {
+                            scaffoldKey.currentState?.closeDrawer();
+                          });
+                        } else {
+                          showFlutterToast(
+                            message: S.of(context).connection_status,
+                            state: ToastStates.error,
+                            context: context,
                           );
-                        },
-                        child: ListView.separated(
-                          controller: anotherScrollController,
-                          clipBehavior: Clip.antiAlias,
-                          physics: BouncingScrollPhysics(),
-                          itemBuilder: (context, globalIndex) {
-                            final String status = appCubit.groupedChats.keys.elementAt(globalIndex);
-                            final List<ChatModel> chats = appCubit.groupedChats.values.elementAt(globalIndex);
-
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  status,
-                                  style: TextStyle(
-                                    fontSize: 13.0,
-                                    letterSpacing:
-                                        (localeLanguage != 'ar') ? 0.6 : 0.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDarkTheme
-                                            ? Colors.grey.shade500
-                                            : Colors.grey.shade600,
-                                  ),
-                                ),
-                                8.0.vrSpace,
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8.0,
-                                  ),
-                                  child: ListView.builder(
-                                    shrinkWrap: true,
-                                    physics: NeverScrollableScrollPhysics(),
-                                    itemBuilder: (context, innerIndex) {
-                                      return buildItemChat(
-                                        chats[innerIndex],
-                                        globalIndex,
-                                        innerIndex,
-                                        isDarkTheme,
-                                      );
-                                    },
-                                    itemCount: chats.length,
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                          separatorBuilder: (context, index) => 12.0.vrSpace,
-                          itemCount: appCubit.groupedChats.length,
+                        }
+                      },
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStatePropertyAll(
+                          theme.scaffoldBackgroundColor,
+                        ),
+                        side: WidgetStatePropertyAll(
+                          BorderSide(
+                            width: 1.5,
+                            color:
+                                (appCubit.messages.isEmpty)
+                                    ? theme.colorScheme.primary
+                                        .withPredefinedOpacity(.3)
+                                    : theme.colorScheme.primary,
+                          ),
+                        ),
+                        enableFeedback: true,
+                        overlayColor: WidgetStatePropertyAll(
+                          Colors.grey.shade300.withPredefinedOpacity(.15),
                         ),
                       ),
-                  fallback: (context) => (state is LoadingGetChatsAppState)
-                              ? shimmerChatLoading(
-                                 width: double.infinity, height: 50.0, radius: 10.0,
-                                 theme: theme, isDarkTheme: isDarkTheme)
-                              : Center(
-                                child: Text(
-                                  S.of(context).no_chats,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 17.0,
-                                    letterSpacing:
-                                        (localeLanguage != 'ar') ? 0.6 : 0.0,
-                                    fontWeight: FontWeight.bold,
+                      label: Text(
+                        S.of(context).new_chat,
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          color:
+                              (appCubit.messages.isEmpty)
+                                  ? theme.colorScheme.primary.withPredefinedOpacity(.3)
+                                  : theme.colorScheme.primary,
+                          letterSpacing: (localeLanguage != 'ar') ? 0.6 : 0.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  16.0.vrSpace,
+                  Expanded(
+                    child: ConditionalBuilder(
+                      condition: appCubit.groupedChats.isNotEmpty,
+                      builder: (context) => RefreshIndicator(
+                            key: refreshIndicatorKey,
+                            color: theme.colorScheme.primary,
+                            backgroundColor: theme.scaffoldBackgroundColor,
+                            onRefresh: () async {
+                              await Future.delayed(const Duration(seconds: 2)).then((value) {
+                                  if (context.mounted) {
+                                    if (CheckCubit.get(context).hasInternet) {
+                                      if(AppCubit.get(context).messages.isEmpty) {
+                                        AppCubit.get(context).getChats(context);
+                                      }
+                                    }
+                                  }
+                                },
+                              );
+                            },
+                            child: ListView.separated(
+                              controller: anotherScrollController,
+                              clipBehavior: Clip.antiAlias,
+                              physics: BouncingScrollPhysics(),
+                              itemBuilder: (context, globalIndex) {
+                                final String status = appCubit.groupedChats.keys.elementAt(globalIndex);
+                                final List<ChatModel> chats = appCubit.groupedChats.values.elementAt(globalIndex);
+
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      status,
+                                      style: TextStyle(
+                                        fontSize: 13.0,
+                                        letterSpacing:
+                                            (localeLanguage != 'ar') ? 0.6 : 0.0,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDarkTheme
+                                                ? Colors.grey.shade500
+                                                : Colors.grey.shade600,
+                                      ),
+                                    ),
+                                    8.0.vrSpace,
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0,
+                                      ),
+                                      child: ListView.builder(
+                                        shrinkWrap: true,
+                                        physics: NeverScrollableScrollPhysics(),
+                                        itemBuilder: (context, innerIndex) {
+                                          return buildItemChat(
+                                            chats[innerIndex],
+                                            globalIndex,
+                                            innerIndex,
+                                            isDarkTheme,
+                                          );
+                                        },
+                                        itemCount: chats.length,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                              separatorBuilder: (context, index) => 12.0.vrSpace,
+                              itemCount: appCubit.groupedChats.length,
+                            ),
+                          ),
+                      fallback: (context) => (state is LoadingGetChatsAppState)
+                                  ? shimmerChatLoading(
+                                     width: double.infinity, height: 50.0, radius: 10.0,
+                                     theme: theme, isDarkTheme: isDarkTheme)
+                                  : Center(
+                                    child: Text(
+                                      S.of(context).no_chats,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 17.0,
+                                        letterSpacing:
+                                            (localeLanguage != 'ar') ? 0.6 : 0.0,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10.0),
-                child: Divider(thickness: 0.6),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: FadeIn(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      defaultIcon(
-                        text: S.of(context).feedback,
-                        color: isDarkTheme
-                                ? Colors.grey.shade800.withPredefinedOpacity(.7)
-                                : Colors.grey.shade200,
-                        size: 26.0,
-                        radius: 50.0,
-                        icon: Icons.feedback_rounded,
-                        colorIcon: isDarkTheme ? Colors.white : Colors.black,
-                        onPress: () {
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Divider(thickness: 0.6),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: FadeIn(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          defaultIcon(
+                            text: S.of(context).feedback,
+                            color: isDarkTheme
+                                    ? Colors.grey.shade800.withPredefinedOpacity(.7)
+                                    : Colors.grey.shade200,
+                            size: 26.0,
+                            radius: 50.0,
+                            icon: Icons.feedback_rounded,
+                            colorIcon: isDarkTheme ? Colors.white : Colors.black,
+                            onPress: () {
+                              if (checkCubit.hasInternet) {
+                                scaffoldKey.currentState?.closeDrawer();
+                                Future.delayed(Duration(milliseconds: 200)).then((v) {
+                                  sendMailMsg(isFeedback: true, recipient: devMail);
+                                });
+                              } else {
+                                showFlutterToast(
+                                  message: S.of(context).connection_status,
+                                  state: ToastStates.error,
+                                  context: context,
+                                );
+                              }
+                            },
+                            context: context,
+                          ),
+                          26.0.hrSpace,
+                          Container(
+                            width: 0.75,
+                            height: 40.0,
+                            color: isDarkTheme ? Colors.white : Colors.black,
+                          ),
+                          26.0.hrSpace,
+                          defaultLanguageDropdown(
+                            appCubit: appCubit,
+                            checkCubit: checkCubit,
+                             isDarkTheme: isDarkTheme,
+                              context: context),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: FadeIn(
+                      child: ElevatedButton(
+                        clipBehavior: Clip.antiAlias,
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStatePropertyAll(
+                            theme.scaffoldBackgroundColor,
+                          ),
+                          side: WidgetStatePropertyAll(
+                            BorderSide(width: 1.5, color: redColor),
+                          ),
+                        ),
+                        onPressed: () {
                           if (checkCubit.hasInternet) {
-                            scaffoldKey.currentState?.closeDrawer();
-                            Future.delayed(Duration(milliseconds: 200)).then((v) {
-                              sendMailMsg(isFeedback: true, recipient: devMail);
+                            showAlertSignOut(context, () {
+                              appCubit.signOut(context, isDarkTheme);
                             });
                           } else {
                             showFlutterToast(
@@ -1161,67 +1215,25 @@ class _ChatScreenState extends State<ChatScreen>
                             );
                           }
                         },
-                        context: context,
-                      ),
-                      26.0.hrSpace,
-                      Container(
-                        width: 0.75,
-                        height: 40.0,
-                        color: isDarkTheme ? Colors.white : Colors.black,
-                      ),
-                      26.0.hrSpace,
-                      defaultLanguageDropdown(
-                        appCubit: appCubit, 
-                        checkCubit: checkCubit,
-                         isDarkTheme: isDarkTheme,
-                          context: context),
-                    ],
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10.0),
-                child: FadeIn(
-                  child: ElevatedButton(
-                    clipBehavior: Clip.antiAlias,
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStatePropertyAll(
-                        theme.scaffoldBackgroundColor,
-                      ),
-                      side: WidgetStatePropertyAll(
-                        BorderSide(width: 1.5, color: redColor),
-                      ),
-                    ),
-                    onPressed: () {
-                      if (checkCubit.hasInternet) {
-                        showAlertSignOut(context, () {
-                          appCubit.signOut(context, isDarkTheme);
-                        });
-                      } else {
-                        showFlutterToast(
-                          message: S.of(context).connection_status,
-                          state: ToastStates.error,
-                          context: context,
-                        );
-                      }
-                    },
-                    child: Text(
-                      S.of(context).sign_out,
-                      style: TextStyle(
-                        fontSize: 17.0,
-                        color: redColor,
-                        letterSpacing: (localeLanguage != 'ar') ? 0.6 : 0.0,
-                        fontWeight: FontWeight.bold,
+                        child: Text(
+                          S.of(context).sign_out,
+                          style: TextStyle(
+                            fontSize: 17.0,
+                            color: redColor,
+                            letterSpacing: (localeLanguage != 'ar') ? 0.6 : 0.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
-      ),
-    ),
+      );
+    }
   );
 
 
