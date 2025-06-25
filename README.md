@@ -4,9 +4,10 @@ A Flutter-based mobile and web AI assistant tailored for Algerian students, with
 
 ## UI/UX Mobile
 
-![1](https://github.com/user-attachments/assets/94921d48-2330-4312-9018-0dcb4423c0e3)
+![1](https://github.com/user-attachments/assets/4f813f82-5821-49da-a96b-55ea729e8d8f)
 
-![2](https://github.com/user-attachments/assets/056fdd2a-130d-4ed8-a691-04ff20461582)
+![2](https://github.com/user-attachments/assets/54348fe0-596a-42a5-bfe3-5d66f98aef41)
+
 
 ## UI/UX Web 
 
