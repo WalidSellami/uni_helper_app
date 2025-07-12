@@ -14,3 +14,7 @@ A Flutter-based mobile and web AI assistant tailored for Algerian students, with
 ![3](https://github.com/user-attachments/assets/f51717bf-0cca-4a17-8e89-c3f8c449e81c)
 
 ![4](https://github.com/user-attachments/assets/0a8aff08-9914-4e7a-b762-165961924771)
+
+
+> 📸 **Note:** The following section contains images.  
+> ⏳ Depending on your internet connection, they may take a few seconds to load. Please be patient.
