@@ -17,4 +17,4 @@ A Flutter-based mobile and web AI assistant tailored for Algerian students, with
 
 
 > 📸 **Note:** The following section contains images.  
-> ⏳ Depending on your internet connection, they may take a few seconds to load. Please be patient.
+> ⏳ Depending on your internet connection, they may take a few seconds to load.
