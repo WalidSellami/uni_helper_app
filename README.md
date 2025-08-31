@@ -1,4 +1,4 @@
-# UniHelper
+# UniHelper --> AI Academic Assistant App
 
 A Flutter-based mobile and web AI assistant tailored for Algerian students, with a focus on **Abdelhamid Mehri University** – **Faculty of NTIC**. It offers smart academic support and university-specific resources.
 
