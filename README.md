@@ -2,6 +2,11 @@
 
 A Flutter-based mobile and web AI assistant tailored for Algerian students, with a focus on **Abdelhamid Mehri University** – **Faculty of NTIC**. It offers smart academic support and university-specific resources.
 
+## Backend Project
+The backend for this app (built with FastAPI) is available as a downloadable archive (.rar):  
+👉 [UniHelper Backend Project](https://drive.usercontent.google.com/download?id=18DxH9qTOGL-e90uG6ZfqCQ4ISp7ZySNK&export=download)
+
+
 ## UI/UX Mobile
 
 ![1](https://github.com/user-attachments/assets/4f813f82-5821-49da-a96b-55ea729e8d8f)
